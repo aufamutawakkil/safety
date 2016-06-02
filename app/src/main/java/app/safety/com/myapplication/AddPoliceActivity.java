@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Dialog;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -28,15 +30,18 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONException;
 
 import core.*;
 
 public class AddPoliceActivity extends FragmentActivity implements LocationListener {
     // A request to connect to Location Services
-   private LocationRequest mLocationRequest;
-   GoogleMap mGoogleMap;
+    private LocationRequest mLocationRequest;
+    GoogleMap mGoogleMap;
 
 
     public static String ShopLat;
@@ -51,20 +56,25 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
     private Geocoder geocoder;
     private List<Address> addresses;
     private TextView Address;
+    private TextView txtNum;
 
     private double latlat;
     private double lnglng;
+
+    Api api = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_add_police);
+        api = new Api(Static.API_KEY);
 
         markerText = (TextView) findViewById(R.id.locationMarkertext);
         Address = (TextView) findViewById(R.id.textLocation);
+        txtNum = (TextView) findViewById(R.id.num);
         markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
-        Button btn_lanjut = (Button) findViewById(R.id.btn_lanjut);
+        Button btnSave = (Button) findViewById(R.id.btn_save);
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil
@@ -93,7 +103,7 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
             mLocationRequest = LocationRequest.create();
 
 
-             //* Set the update interval
+            //* Set the update interval
             mLocationRequest.setInterval(GData.UPDATE_INTERVAL_IN_MILLISECONDS);
 
             // Use high accuracy
@@ -109,36 +119,38 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
             stupMap();
 
             //  Create a new location client, using the enclosing class to handle
-             // callbacks.
+            // callbacks.
 
             //mLocationClient = new LocationClient(this, this, this);
             //mLocationClient.connect();
         }
 
         //button click
-        btn_lanjut.setOnClickListener(new OnClickListener() {
+        btnSave.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-               /* publicdata.latitude_alamat_mengirim = latlat+"";
-                publicdata.longitude_alamat_mengirim = lnglng+"";
-                publicdata.alamat_alamat_mengirim = Address.getText().toString();
-
-                FragmentAddressOrder.txtalamat.setText(Address.getText().toString());*/
-
-                Log.i("lang lat" , String.valueOf(latlat) + ' ' + String.valueOf(lnglng) );
-
-                //finish();
+                Api.Police police = new Api.Police();
+                police.address = Address.getText().toString();
+                police.num = txtNum.getText().toString();
+                police.lat = latlat;
+                police.lng = lnglng;
+                api.pushPolice(police, new Api.Callback<Api.Police>() {
+                    @Override
+                    public Void success(Api.Police params) throws JSONException {
+                        Log.i("police ", params.toString());
+                        return null;
+                    }
+                });
             }
         });
     }
-
 
 
     private void stupMap() {
         try {
             LatLng latLong;
             // TODO Auto-generated method stub
-            mGoogleMap = ((MapFragment) getFragmentManager().findFragmentById(
+            mGoogleMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(
                     R.id.map)).getMap();
 
             // Enabling MyLocation in Google Map
@@ -153,11 +165,22 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
 
 
             } else {*/
-                latLong = new LatLng(-7.257472,112.752088);
+            latLong = new LatLng(-7.257472, 112.752088);
             //}
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLong).zoom(16f).build();
 
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             mGoogleMap.setMyLocationEnabled(true);
             mGoogleMap.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));

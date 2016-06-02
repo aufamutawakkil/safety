@@ -31,7 +31,7 @@ public class DBHelper extends SQLiteOpenHelper {
             // TODO Auto-generated method stub
             db.execSQL(
                     "create table login (id int, username varchar, password varchar);" +
-                    "create table setting (no_hardware varchar,command reset varchar);" +
+                    "create table setting (no_hardware varchar,command_reset varchar);" +
                     "create table location (id int, lng varchar,lat varchar, tgl datetime default current_timestamp);"
             );
         }
@@ -56,12 +56,18 @@ public class DBHelper extends SQLiteOpenHelper {
             return true;
         }
 
-        public Cursor getData(int id,String sql){
+        public Cursor getData(String tableName,int id){
             SQLiteDatabase db = this.getReadableDatabase();
-            //Cursor res =  db.rawQuery( "select * from login where id="+id+"", null );
-            Cursor res =  db.rawQuery(sql, null );
+            Cursor res =  db.rawQuery( "select * from " + tableName + " where id="+id+"", null );
+            //Cursor res =  db.rawQuery(sql, null );
             return res;
         }
+
+    public Cursor query(String sql){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery(sql, null );
+        return res;
+    }
 
         public int numberOfRows(String tableName){
             SQLiteDatabase db = this.getReadableDatabase();

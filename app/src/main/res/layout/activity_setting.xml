@@ -13,14 +13,14 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/noHardware"
         android:layout_gravity="center_horizontal"
         android:hint="No Hardware" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText2"
+        android:id="@+id/commandRestart"
         android:layout_gravity="center_horizontal"
         android:hint="Command Restart" />
 
@@ -35,7 +35,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText3"
+        android:id="@+id/user"
         android:layout_gravity="center_horizontal"
         android:hint="Username" />
 
@@ -44,8 +44,15 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:ems="10"
-        android:id="@+id/editText4"
+        android:id="@+id/pass"
         android:layout_gravity="center_horizontal"
         android:hint="•••••••••••••••" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Simpan"
+        android:id="@+id/btn_save"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

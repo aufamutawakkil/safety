@@ -11,3 +11,4 @@ public class StreetViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_street_view);
     }
 }
+
