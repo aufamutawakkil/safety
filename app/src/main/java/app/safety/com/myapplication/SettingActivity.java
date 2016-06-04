@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
+import app.safety.com.R;
 import core.Api;
 import core.DBHelper;
 import core.Static;
@@ -26,13 +28,13 @@ public class SettingActivity extends AppCompatActivity {
         /*get edittext value*/
         final EditText noHardware = (EditText)findViewById(R.id.noHardware);
         final EditText commandRestart = (EditText)findViewById(R.id.commandRestart);
-        final EditText user = (EditText)findViewById(R.id.user);
-        final EditText pass = (EditText)findViewById(R.id.pass);
+        final EditText commandAlarm = (EditText)findViewById(R.id.commandAlarm);
 
         noHardware.setText(PublicData.noHardware);
         commandRestart.setText(PublicData.commandRestart);
-        user.setText(PublicData.user);
-        pass.setText(PublicData.pass);
+        commandAlarm.setText(PublicData.commandAlarm);
+       /* user.setText(PublicData.user);
+        pass.setText(PublicData.pass);*/
 
         Button btnSave = (Button) findViewById(R.id.btn_save);
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -41,22 +43,31 @@ public class SettingActivity extends AppCompatActivity {
                 //save to temp
                 PublicData.noHardware = noHardware.getText().toString();
                 PublicData.commandRestart = commandRestart.getText().toString();
-                PublicData.user = user.getText().toString();
-                PublicData.pass = pass.getText().toString();
+                PublicData.commandAlarm = commandAlarm.getText().toString();
+               /* PublicData.user = user.getText().toString();
+                PublicData.pass = pass.getText().toString();*/
 
                 Api.Setting setting = new Api.Setting();
                 setting.commandRestart = commandRestart.getText().toString();
                 setting.noHardware = noHardware.getText().toString();
-                setting.user = user.getText().toString();
-                setting.pass = pass.getText().toString();
+                setting.commandAlarm = commandAlarm.getText().toString();
+                /*setting.user = user.getText().toString();
+                setting.pass = pass.getText().toString();*/
 
                 //save to server
                 api.pushSetting(setting, new Api.Callback<Api.Setting>() {
                     @Override
                     public Void success(Api.Setting params) throws JSONException {
-                        Log.i("setting",params.toString());
+                        Toast.makeText(getApplicationContext(),"Ubah data berhasil",Toast.LENGTH_SHORT).show();
                         return null;
                     }
+
+                    @Override
+                    public Void failed(String msg) {
+                        Toast.makeText(getApplicationContext(), "ERROR : " + msg , Toast.LENGTH_SHORT).show();
+                        return null;
+                    }
+
                 });
 
 

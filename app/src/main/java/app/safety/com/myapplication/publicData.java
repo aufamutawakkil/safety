@@ -6,6 +6,7 @@ package app.safety.com.myapplication;
 public class PublicData {
     public static String noHardware = "";
     public static String commandRestart = "";
+    public static String commandAlarm = "";
     public static String user = "";
     public static String pass = "";
 

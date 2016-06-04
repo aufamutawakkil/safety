@@ -1,5 +1,6 @@
 package app.safety.com.myapplication;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -9,6 +10,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.lang.reflect.Constructor;
+
+import app.safety.com.R;
+import app.safety.com.service.Service;
 import core.DBHelper;
 import core.SmsUtils;
 
@@ -17,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private OnLoad onload;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        onload  = new OnLoad();
+        //onload  = new OnLoad(this);
         //db = new DBHelper(this);
 
         /*Cursor dbRes = db.query("select * from setting");
@@ -29,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //start service
+        startService(new Intent(getBaseContext(),Service.class));
 
         Button btn_monitoring = (Button) findViewById(R.id.btn_monitoring);
         Button btn_kontak_polisi = (Button) findViewById(R.id.btn_kontak_polisi);

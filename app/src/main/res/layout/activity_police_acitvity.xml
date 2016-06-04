@@ -12,9 +12,21 @@
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/listView2"
+        android:id="@id/android:list"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <ProgressBar
+        android:id="@+id/indeterminate_progress_native"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|bottom"
+        android:indeterminate="true"
+        style="?android:progressBarStyle"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentTop="false"
+        android:layout_centerInParent="true"
+        android:background="@null" />
 
     <LinearLayout
         android:orientation="vertical"

@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import app.safety.com.myapplication.R;
+import app.safety.com.R;
 
 public class MonitoringLocationAdapter extends ArrayAdapter {
 

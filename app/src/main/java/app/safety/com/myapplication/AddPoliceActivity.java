@@ -5,22 +5,28 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -36,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 
+import app.safety.com.R;
 import core.*;
 
 public class AddPoliceActivity extends FragmentActivity implements LocationListener {
@@ -57,11 +64,19 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
     private List<Address> addresses;
     private TextView Address;
     private TextView txtNum;
+    private TextView txtLocation;
+    private TextView txtContact;
+    private LinearLayout btnCall;
 
     private double latlat;
     private double lnglng;
 
     Api api = null;
+    Bundle b;
+
+    boolean EDITABLE = false;
+
+    Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +85,52 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
         setContentView(R.layout.activity_add_police);
         api = new Api(Static.API_KEY);
 
+
+
         markerText = (TextView) findViewById(R.id.locationMarkertext);
         Address = (TextView) findViewById(R.id.textLocation);
-        txtNum = (TextView) findViewById(R.id.num);
+        txtNum = (TextView) findViewById(R.id.textKontak);
         markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
-        Button btnSave = (Button) findViewById(R.id.btn_save);
+        txtLocation = (TextView) findViewById(R.id.txtLocation);
+        txtContact = (TextView) findViewById(R.id.txtContact);
+        final Button btnSave = (Button) findViewById(R.id.btn_save);
+
+        b = new Bundle();
+        if(!b.isEmpty()){
+            EDITABLE = true;
+            menu.findItem(R.id.edit_button).setVisible(true);
+
+            /*edit text invisible*/
+            Address.setVisibility(View.INVISIBLE);
+            txtNum.setVisibility(View.INVISIBLE);
+
+            txtLocation.setVisibility(View.VISIBLE);
+            txtContact.setVisibility(View.VISIBLE);
+            txtLocation.setText(b.getString("address"));
+            txtContact.setText(b.getString("number"));
+        }
+
+        btnCall.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String num = ((TextView) v.findViewById(R.id.txtContact)).getText().toString();
+
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:" + num));
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                startActivity(callIntent);
+            }
+        });
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil
@@ -134,13 +190,44 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
                 police.num = txtNum.getText().toString();
                 police.lat = latlat;
                 police.lng = lnglng;
-                api.pushPolice(police, new Api.Callback<Api.Police>() {
-                    @Override
-                    public Void success(Api.Police params) throws JSONException {
-                        Log.i("police ", params.toString());
-                        return null;
-                    }
-                });
+
+                btnSave.setText("Menyimpan...");
+
+                if(!EDITABLE)
+                    api.pushPolice(police, new Api.Callback<Api.Police>() {
+                        @Override
+                        public Void success(Api.Police params) throws JSONException {
+                            btnSave.setText("Berhasil");
+                            Intent i = new Intent(getApplicationContext(),PoliceAcitvity.class);
+                            startActivity(i);
+                            return null;
+                        }
+
+                        @Override
+                        public Void failed(String msg) {
+                            Toast.makeText(getApplicationContext(), "ERROR : " + msg , Toast.LENGTH_SHORT).show();
+                            return null;
+                        }
+                    });
+                else {
+                    police.id = b.getString("id");
+                    api.updatePolice(police, new Api.Callback<Api.Police>() {
+                        @Override
+                        public Void success(Api.Police params) throws JSONException {
+                            btnSave.setText("Berhasil");
+                            Intent i = new Intent(getApplicationContext(), PoliceAcitvity.class);
+                            startActivity(i);
+                            return null;
+                        }
+
+                        @Override
+                        public Void failed(String msg) {
+                            Toast.makeText(getApplicationContext(), "ERROR : " + msg, Toast.LENGTH_SHORT).show();
+                            return null;
+                        }
+
+                    });
+                }
             }
         });
     }
@@ -165,7 +252,8 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
 
 
             } else {*/
-            latLong = new LatLng(-7.257472, 112.752088);
+            if( EDITABLE )latLong = new LatLng(Double.parseDouble(b.getString("lat")),Double.parseDouble(b.getString("lng")));
+            else latLong = new LatLng(-7.257472, 112.752088);
             //}
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLong).zoom(16f).build();
@@ -181,7 +269,8 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            mGoogleMap.setMyLocationEnabled(true);
+
+            if(!EDITABLE) mGoogleMap.setMyLocationEnabled(true);
             mGoogleMap.animateCamera(CameraUpdateFactory
                     .newCameraPosition(cameraPosition));
             // Clears all the existing markers
@@ -194,7 +283,7 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
                     // TODO Auto-generated method stub
                     center = mGoogleMap.getCameraPosition().target;
 
-                    markerText.setText(" Lokasi Anda ");
+                    markerText.setText(" Lokasi Polisi ");
                     mGoogleMap.clear();
                     markerLayout.setVisibility(View.VISIBLE);
 
@@ -326,6 +415,40 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
 
         @Override
         protected void onProgressUpdate(Void... values) {
+
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_activity_detail_police, menu);
+
+        menu.findItem(R.id.edit_button).setVisible(false);
+        this.menu = menu;
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.edit_button:
+                /*edit text true*/
+                txtNum.setVisibility(View.VISIBLE);
+                Address.setVisibility(View.VISIBLE);
+                txtNum.setText(b.getString("number"));
+                Address.setText(b.getString("address"));
+
+                /*text view false*/
+                txtLocation.setVisibility(View.INVISIBLE);
+                txtContact.setVisibility(View.INVISIBLE);
+
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
 
         }
     }

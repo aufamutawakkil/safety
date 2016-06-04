@@ -12,19 +12,25 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import app.safety.com.myapplication.R;
+import app.safety.com.R;
 
 public class PoliceAdapter extends ArrayAdapter {
 
     private Context context;
     private ArrayList<String> address;
     private ArrayList<String> num;
+    private ArrayList<String> id;
+    private ArrayList<String> lat;
+    private ArrayList<String> lng;
 
-    public PoliceAdapter(Context context, ArrayList<String> address, ArrayList<String> num) {
-        super(context, R.layout.activity_police_adapter,num);
+    public PoliceAdapter(Context context, ArrayList<String> address, ArrayList<String> num,ArrayList<String> id,ArrayList<String> lat,ArrayList<String> lng) {
+        super(context, R.layout.activity_police_adapter,id);
         this.context = context;
         this.address = address;
         this.num = num;
+        this.id = id;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -39,8 +45,13 @@ public class PoliceAdapter extends ArrayAdapter {
 
         TextView txtAddress = (TextView) rowView.findViewById(R.id.address);
         TextView txtNum= (TextView) rowView.findViewById(R.id.num);
+        TextView txtLat= (TextView) rowView.findViewById(R.id.lat);
+        TextView txtLng= (TextView) rowView.findViewById(R.id.lng);
+
         txtAddress.setText(address.get(position));
         txtNum.setText(num.get(position));
+        txtLat.setText(lat.get(position));
+        txtLng.setText(lng.get(position));
 
         return rowView;
     }

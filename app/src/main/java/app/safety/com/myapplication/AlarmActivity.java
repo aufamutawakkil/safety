@@ -5,12 +5,11 @@ import android.os.Bundle;
 
 import app.safety.com.R;
 
-public class StreetViewActivity extends AppCompatActivity {
+public class AlarmActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_street_view);
+        setContentView(R.layout.activity_alarm);
     }
 }
-

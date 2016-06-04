@@ -1,6 +1,7 @@
 package core;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,11 +53,13 @@ public class Api {
         public double lng;
         public String num;
         public String address;
+        public String id;
     }
 
     public static class Setting{
         public String noHardware;
         public String commandRestart;
+        public String commandAlarm;
         public  String user;
         public String pass;
     }
@@ -86,6 +89,17 @@ public class Api {
         this.police = police;
         this.pushPoliceCallback = callback;
         this.startTask("PUSH_POLICE");
+    }
+
+    /******************
+     * Update Police
+     ******************/
+    private Callback<Police> updatePoliceCallback;
+
+    public void updatePolice(Police police, Callback<Police> callback) {
+        this.police = police;
+        this.updatePoliceCallback = callback;
+        this.startTask("UPDATE_POLICE");
     }
 
     /******************
@@ -168,12 +182,12 @@ public class Api {
                     case "GET_POLICE_BY_ID":
                         get = "?api_key=" + Static.API_KEY;
                         get += this.getParams;
-                        result = restTemplate.getForObject(Static.BASE_URL + "server?p=police" + get, String.class);
+                        result = restTemplate.getForObject(Static.BASE_URL + "server.php?p=police" + get, String.class);
                         break;
 
                     case "GET_ALL_POLICE":
-                        get = "?api_key=" + Static.API_KEY;
-                        result = restTemplate.getForObject(Static.BASE_URL + "server?p=police" + get, String.class);
+                        get = "&api_key=" + Static.API_KEY;
+                        result = restTemplate.getForObject(Static.BASE_URL + "server.php?p=police" + get, String.class);
                         break;
 
                     case "PUSH_POLICE":
@@ -184,7 +198,19 @@ public class Api {
                         post.add("address", Api.this.police.address);
 
                         get = "?api_key=" + Static.API_KEY;
-                        result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=police/push" + get, post, String.class);
+                        result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=police" + get, post, String.class);
+                        break;
+
+                    case "UPDATE_POLICE":
+                        post.clear();
+                        post.add("lat",Double.toString(Api.this.police.lat));
+                        post.add("lng", Double.toString(Api.this.police.lng));
+                        post.add("number", Api.this.police.num);
+                        post.add("address", Api.this.police.address);
+                        post.add("id", Api.this.police.id);
+
+                        get = "&api_key=" + Static.API_KEY + "&a=edit";
+                        result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=police" + get, post, String.class);
                         break;
 
                     case "PUSH_SETTING":
@@ -193,12 +219,12 @@ public class Api {
                         post.add("commandRestart", Api.this.setting.commandRestart);
 
                         get = "?api_key=" + Static.API_KEY;
-                        result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=police" + get, post, String.class);
+                        result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=setting" + get, post, String.class);
                         break;
 
                     case "GET_SETTING":
                         get = "?api_key=" + Static.API_KEY;
-                        result = restTemplate.getForObject(Static.BASE_URL + "server?p=setting" + get, String.class);
+                        result = restTemplate.getForObject(Static.BASE_URL + "server.php?p=setting" + get, String.class);
                         break;
                 }
                 return result;
@@ -211,6 +237,9 @@ public class Api {
             switch (this.mode) {
                 case "PUSH_POLICE":
                     Api.this.pushPoliceCallback.failed(msg);
+                    break;
+                case "UPDATE_POLICE":
+                    Api.this.updatePoliceCallback.failed(msg);
                     break;
                 case "GET_ALL_POLICE":
                     Api.this.getAllPoliceCallback.failed(msg);
@@ -232,6 +261,7 @@ public class Api {
             if (json == "") {
                 this.throwFail("Empty response from server");
             } else {
+
                 Boolean isSuccess = false;
                 String errorMsg = "";
                 HashMap<String, Object> map = new HashMap<String, Object>();
@@ -240,50 +270,55 @@ public class Api {
                 try {
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     map = mapper.readValue(json, HashMap.class);
+                    if( map.get("status").toString().equals("0")) {
+                        isSuccess = true;
+                    }
+                    errorMsg = (String) map.get("desc");
 
-                    isSuccess = (Integer) map.get("status") == 0;
-                    errorMsg = (String) map.get("message");
-
-                    switch (this.mode) {
-                        case "PUSH_POLICE":
-                            if (isSuccess) {
-                                HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
-                                Api.this.status = APIStatus.ACTIVE;
-                                Api.this.pushPoliceCallback.success(Api.this.police);
-                            } else {
-                                Api.this.status = APIStatus.INACTIVE;
-                            }
-                            break;
-                        case "GET_ALL_POLICE":
-                            if (isSuccess) {
-                                HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
-                                StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
-                                Api.this.getAllPoliceCallback.success(subdata);
-                            }
-                            break;
-                        case "GET_POLICE_BY_ID":
-                            if (isSuccess) {
-                                HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
-                                StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
-                                Api.this.getPoliceByIdCallback.success(subdata);
-                            }
-                            break;
-                        case "PUSH_SETTING":
-                            if (isSuccess) {
-                                HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
-                                Api.this.status = APIStatus.ACTIVE;
-                                Api.this.pushSettingCallback.success(Api.this.setting);
-                            } else {
-                                Api.this.status = APIStatus.INACTIVE;
-                            }
-                            break;
-                        case "GET_SETTING":
-                            if (isSuccess) {
-                                HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
-                                StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
-                                Api.this.getSettingCallBack.success(subdata);
-                            }
-                            break;
+                    if( this.mode.equals("GET_ALL_POLICE")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
+                            //Log.v("aufa police",subdata.toString());
+                            Api.this.getAllPoliceCallback.success(subdata);
+                        }
+                    }else if(this.mode.equals("PUSH_POLICE")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            Api.this.status = APIStatus.ACTIVE;
+                            Api.this.pushPoliceCallback.success(Api.this.police);
+                        } else {
+                            Api.this.status = APIStatus.INACTIVE;
+                        }
+                    }
+                    else if(this.mode.equals("UPDATE_POLICE")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            Api.this.status = APIStatus.ACTIVE;
+                            Api.this.updatePoliceCallback.success(Api.this.police);
+                        } else {
+                            Api.this.status = APIStatus.INACTIVE;
+                        }
+                    }else if(this.mode.equals("GET_POLICE_BY_ID")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
+                            Api.this.getPoliceByIdCallback.success(subdata);
+                        }
+                    }else if(this.mode.equals("PUSH_SETTING")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            Api.this.status = APIStatus.ACTIVE;
+                            Api.this.pushSettingCallback.success(Api.this.setting);
+                        } else {
+                            Api.this.status = APIStatus.INACTIVE;
+                        }
+                    }else if(this.mode.equals("GET_SETTING")){
+                        if (isSuccess) {
+                            HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
+                            StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
+                            Api.this.getSettingCallBack.success(subdata);
+                        }
                     }
 
                     if (!isSuccess) {
