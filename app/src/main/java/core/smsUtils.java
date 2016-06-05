@@ -36,10 +36,10 @@ public class SmsUtils {
             }
         }
 
-        public HashMap read(){
-            HashMap sms = new HashMap<String,String>();
-
-            int i = 0;
+        public ArrayList read(){
+            ArrayList<Long> _id = new ArrayList();
+            ArrayList _number = new ArrayList();
+            ArrayList _content = new ArrayList();
 
             Uri uriSms = Uri.parse("content://sms/inbox");
             Cursor cursor = this.app.getContentResolver().query(uriSms, new String[]{"_id", "address", "date", "body"},null,null,null);
@@ -47,14 +47,25 @@ public class SmsUtils {
             cursor.moveToFirst();
             while  (cursor.moveToNext())
             {
+                long id = cursor.getLong(0);
                 String address = cursor.getString(1);
                 String body = cursor.getString(3);
-                sms.put("address",address);
-                sms.put("body",body);
-                i++;
-                if(i == 10) break;
+                _number.add(address);
+                _content.add(body);
+                _id.add(id);
             }
-            return sms;
+
+            ArrayList data = new ArrayList();
+            data.add(_id);
+            data.add(_number);
+            data.add(_content);
+
+            return data;
+        }
+
+        public void delete(Context context,long id){
+                context.getContentResolver().delete(
+                        Uri.parse("content://sms/" + id), null, null);
         }
 
 }

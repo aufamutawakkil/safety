@@ -93,12 +93,13 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
         markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
         txtLocation = (TextView) findViewById(R.id.txtLocation);
         txtContact = (TextView) findViewById(R.id.txtContact);
+        btnCall = (LinearLayout) findViewById(R.id.call);
         final Button btnSave = (Button) findViewById(R.id.btn_save);
 
-        b = new Bundle();
+        b = getIntent().getExtras();
         if(!b.isEmpty()){
             EDITABLE = true;
-            menu.findItem(R.id.edit_button).setVisible(true);
+            //menu.findItem(R.id.edit_button).setVisible(true);
 
             /*edit text invisible*/
             Address.setVisibility(View.INVISIBLE);
@@ -106,11 +107,12 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
 
             txtLocation.setVisibility(View.VISIBLE);
             txtContact.setVisibility(View.VISIBLE);
+
             txtLocation.setText(b.getString("address"));
             txtContact.setText(b.getString("number"));
         }
 
-        btnCall.setOnClickListener(new OnClickListener() {
+        /*btnCall.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -130,7 +132,7 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
                 }
                 startActivity(callIntent);
             }
-        });
+        });*/
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil
@@ -434,14 +436,14 @@ public class AddPoliceActivity extends FragmentActivity implements LocationListe
         switch (item.getItemId()) {
             case R.id.edit_button:
                 /*edit text true*/
-                txtNum.setVisibility(View.VISIBLE);
+                /*txtNum.setVisibility(View.VISIBLE);
                 Address.setVisibility(View.VISIBLE);
                 txtNum.setText(b.getString("number"));
                 Address.setText(b.getString("address"));
 
-                /*text view false*/
+                *//*text view false*//*
                 txtLocation.setVisibility(View.INVISIBLE);
-                txtContact.setVisibility(View.INVISIBLE);
+                txtContact.setVisibility(View.INVISIBLE);*/
 
                 return true;
 

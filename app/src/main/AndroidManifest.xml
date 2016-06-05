@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <application
         android:allowBackup="true"
@@ -56,7 +57,12 @@
         <activity android:name=".adptr.PoliceAdapter" />
         <activity android:name=".myapplication.AlarmActivity"></activity>
 
-        <service android:name=".service.Service" />
+        <service android:name=".service.AlarmService" />
+        <receiver android:name=".service.SmsListener">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

@@ -2,8 +2,11 @@ package app.safety.com.myapplication;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import android.app.Dialog;
 import android.content.pm.PackageManager;
@@ -69,6 +72,8 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
     private double latlat;
     private double lnglng;
 
+    private SmsUtils smsUtils;
+
     Api api = null;
     int index = 1;
     int lastIndex = 0;
@@ -84,8 +89,10 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
             txtNum = (TextView) findViewById(R.id.num);
             markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
 
+            smsUtils = new SmsUtils(getApplicationContext());
 
-
+            //refresh point polilyne
+            PublicData.points = new ArrayList<>();
 
             // Getting Google Play availability status
             int status = GooglePlayServicesUtil
@@ -156,14 +163,13 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
 
             @Override
             public void onClick(View v) {
-                points.add(new LatLng(-7.310481, 112.726772));
                 PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
                     /*for (int i = 0; i < points.size(); i++) {
                         //LatLng point = points.get(i);
                         options.add(points.get(i));
                     }*/
 
-                mGoogleMap.addPolyline(options.addAll(points));
+                mGoogleMap.addPolyline(options.addAll(PublicData.points));
 
             }
         });
@@ -233,6 +239,53 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
                 }
             });
 
+            new Thread(new Runnable() {
+                public void run() {
+
+                    //update googlemap
+                    PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
+                    if( PublicData.points.size() > 0 )
+                        mGoogleMap.addPolyline(options.addAll(PublicData.points));
+
+                    /*char  charat;
+
+                    ArrayList<Long> id;
+                    ArrayList number;
+                    ArrayList content;
+
+                    String numberSms = "";
+
+                    ArrayList sms = smsUtils.read();
+                    id = ((ArrayList) sms.get(0));
+                    number = ((ArrayList) sms.get(1));
+                    content = ((ArrayList) sms.get(2));
+
+
+                    for(int i=0;i<id.size();i++){
+                        charat = number.get(i).toString().charAt(0);
+                        if( charat == '0'  ){
+                            numberSms = number.get(i).toString();
+                        }else if( charat == '+' ){
+                            numberSms = "0" + number.get(i).toString().substring(2);
+                        }
+
+                        if( PublicData.noHardware.equals(numberSms) ){
+                            String body[] = content.get(i).toString().split("|");
+                            if(body[0] == "monitoring"){
+                                PublicData.points.add( new LatLng(Double.parseDouble(body[1]),Double.parseDouble(body[2])));
+
+                                //update googlemap
+                                PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
+                                mGoogleMap.addPolyline(options.addAll(PublicData.points));
+
+                                //delete sms
+                                smsUtils.delete(getApplicationContext(),id.get(i));
+                            }
+                        }
+
+                    }*/
+                }
+            }).start();
             /*markerLayout.setOnClickListener(new OnClickListener() {
 
                 @Override

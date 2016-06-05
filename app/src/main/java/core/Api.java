@@ -125,9 +125,9 @@ public class Api {
     /******************
      * Insert Setting
      ******************/
-    private Callback<Setting> pushSettingCallback;
+    private Callback<StaticArray> pushSettingCallback;
 
-    public void pushSetting(Api.Setting setting,Callback<Setting> callback) {
+    public void pushSetting(Api.Setting setting,Callback<StaticArray> callback) {
         this.setting = setting;
         this.pushSettingCallback = callback;
         this.startTask("PUSH_SETTING");
@@ -217,13 +217,15 @@ public class Api {
                         post.clear();
                         post.add("noHardware",Api.this.setting.noHardware);
                         post.add("commandRestart", Api.this.setting.commandRestart);
+                        post.add("commandAlarm", Api.this.setting.commandAlarm);
 
-                        get = "?api_key=" + Static.API_KEY;
+                        get = "&api_key=" + Static.API_KEY;
                         result = restTemplate.postForObject(Static.BASE_URL + "server.php?p=setting" + get, post, String.class);
                         break;
 
                     case "GET_SETTING":
-                        get = "?api_key=" + Static.API_KEY;
+                        Log.v("aufa ",Static.BASE_URL + "server.php?p=setting");
+                        get = "&api_key=" + Static.API_KEY;
                         result = restTemplate.getForObject(Static.BASE_URL + "server.php?p=setting" + get, String.class);
                         break;
                 }
@@ -258,6 +260,7 @@ public class Api {
 
         @Override
         protected void onPostExecute(String json) {
+            Log.v("aufa",json);
             if (json == "") {
                 this.throwFail("Empty response from server");
             } else {
@@ -309,11 +312,13 @@ public class Api {
                         if (isSuccess) {
                             HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
                             Api.this.status = APIStatus.ACTIVE;
-                            Api.this.pushSettingCallback.success(Api.this.setting);
+                            StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));
+                            Api.this.pushSettingCallback.success(subdata);
                         } else {
                             Api.this.status = APIStatus.INACTIVE;
                         }
                     }else if(this.mode.equals("GET_SETTING")){
+                        Log.v("aufa","get setting 2");
                         if (isSuccess) {
                             HashMap<String, Object> data = (HashMap<String, Object>) map.get("data");
                             StaticArray subdata = new StaticArray((ArrayList<LinkedHashMap<String, String>>) data.get("data"));

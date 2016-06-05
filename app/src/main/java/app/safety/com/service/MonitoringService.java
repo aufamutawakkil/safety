@@ -14,7 +14,7 @@ import app.safety.com.myapplication.AlarmActivity;
 /**
  * Created by aufa on 6/2/2016.
  */
-public class Service extends android.app.Service {
+public class MonitoringService extends android.app.Service {
     Context context;
 
     @Override
@@ -48,12 +48,14 @@ public class Service extends android.app.Service {
             }
         }.start();*/
 
+
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //Toast.makeText(this, "Service Destroyed", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "AlarmService Destroyed", Toast.LENGTH_LONG).show();
     }
 }

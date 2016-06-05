@@ -18,6 +18,7 @@ import core.Static;
 
 public class SettingActivity extends AppCompatActivity {
     Api api;
+    Button btnSave;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,11 +37,14 @@ public class SettingActivity extends AppCompatActivity {
        /* user.setText(PublicData.user);
         pass.setText(PublicData.pass);*/
 
-        Button btnSave = (Button) findViewById(R.id.btn_save);
+        btnSave = (Button) findViewById(R.id.btn_save);
+
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //save to temp
+                btnSave.setText("Menyimpan...");
+
                 PublicData.noHardware = noHardware.getText().toString();
                 PublicData.commandRestart = commandRestart.getText().toString();
                 PublicData.commandAlarm = commandAlarm.getText().toString();
@@ -55,15 +59,17 @@ public class SettingActivity extends AppCompatActivity {
                 setting.pass = pass.getText().toString();*/
 
                 //save to server
-                api.pushSetting(setting, new Api.Callback<Api.Setting>() {
+                api.pushSetting(setting, new Api.Callback<Api.StaticArray>() {
                     @Override
-                    public Void success(Api.Setting params) throws JSONException {
+                    public Void success(Api.StaticArray params) throws JSONException {
+                        btnSave.setText("Simpan");
                         Toast.makeText(getApplicationContext(),"Ubah data berhasil",Toast.LENGTH_SHORT).show();
                         return null;
                     }
 
                     @Override
                     public Void failed(String msg) {
+                        btnSave.setText("Simpan");
                         Toast.makeText(getApplicationContext(), "ERROR : " + msg , Toast.LENGTH_SHORT).show();
                         return null;
                     }
