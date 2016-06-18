@@ -36,4 +36,5 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'me.zhanghai.android.materialprogressbar:library:1.0.2'
+    compile 'com.android.support:design:23.4.0'
 }

@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //start service
-        startService(new Intent(getBaseContext(),AlarmService.class));
+        Intent intent = new Intent(this, AlarmService.class);
+        startService(intent);
 
         Button btn_monitoring = (Button) findViewById(R.id.btn_monitoring);
         Button btn_kontak_polisi = (Button) findViewById(R.id.btn_kontak_polisi);

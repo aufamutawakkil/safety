@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Handler;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -15,8 +17,10 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -28,9 +32,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 //import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -68,6 +75,7 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
     private TextView txtNum;
     private ArrayList<LatLng> points;
     private Polyline line;
+    private android.os.Handler handler;
 
     private double latlat;
     private double lnglng;
@@ -75,106 +83,123 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
     private SmsUtils smsUtils;
 
     Api api = null;
-    int index = 1;
-    int lastIndex = 0;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
+    //Bundle b;
+    boolean isAlarm = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_police);
 
-            setContentView(R.layout.activity_add_police);
-            api = new Api(Static.API_KEY);
-            points = new ArrayList<>();
-            markerText = (TextView) findViewById(R.id.locationMarkertext);
-            Address = (TextView) findViewById(R.id.textLocation);
-            txtNum = (TextView) findViewById(R.id.num);
-            markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
+       /* b = getIntent().getExtras();
+        if(!b.isEmpty()){isAlarm=true;}*/
 
-            smsUtils = new SmsUtils(getApplicationContext());
+        api = new Api(Static.API_KEY);
+        points = new ArrayList<>();
+        markerText = (TextView) findViewById(R.id.locationMarkertext);
+        Address = (TextView) findViewById(R.id.textLocation);
+        txtNum = (TextView) findViewById(R.id.num);
+        markerLayout = (LinearLayout) findViewById(R.id.locationMarker);
 
-            //refresh point polilyne
-            PublicData.points = new ArrayList<>();
+        smsUtils = new SmsUtils(getApplicationContext());
 
-            // Getting Google Play availability status
-            int status = GooglePlayServicesUtil
-                    .isGooglePlayServicesAvailable(getBaseContext());
+        //refresh point polilyne
+        PublicData.points = new ArrayList<>();
 
-            if (status != ConnectionResult.SUCCESS) { // Google Play Services are
-                // not available
+        // Getting Google Play availability status
+        int status = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(getBaseContext());
 
-                int requestCode = 10;
-                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this,
-                        requestCode);
-                dialog.show();
+        if (status != ConnectionResult.SUCCESS) { // Google Play Services are
+            // not available
 
-            } else { // Google Play Services are available*/
+            int requestCode = 10;
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this,
+                    requestCode);
+            dialog.show();
 
-                try {
-                    // Loading map
-                    stupMap();
+        } else { // Google Play Services are available*/
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                // Getting reference to the SupportMapFragment
-                // Create a new global location parameters object
-                mLocationRequest = LocationRequest.create();
-
-
-                //* Set the update interval
-                mLocationRequest.setInterval(GData.UPDATE_INTERVAL_IN_MILLISECONDS);
-
-                // Use high accuracy
-                mLocationRequest
-                        .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-                // Set the interval ceiling to one minute
-                mLocationRequest
-                        .setFastestInterval(GData.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
-
-                // Note that location updates are off until the user turns them on
-                mUpdatesRequested = false;
+            try {
+                // Loading map
                 stupMap();
 
-                //  Create a new location client, using the enclosing class to handle
-                // callbacks.
-
-                //mLocationClient = new LocationClient(this, this, this);
-                //mLocationClient.connect();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
+            // Getting reference to the SupportMapFragment
+            // Create a new global location parameters object
+            mLocationRequest = LocationRequest.create();
 
 
-        Button btnRefresh = (Button) findViewById(R.id.btn_save);
-        points.add(new LatLng(-7.312079, 112.731018));
+            //* Set the update interval
+            mLocationRequest.setInterval(GData.UPDATE_INTERVAL_IN_MILLISECONDS);
+
+            // Use high accuracy
+            mLocationRequest
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            // Set the interval ceiling to one minute
+            mLocationRequest
+                    .setFastestInterval(GData.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+
+            // Note that location updates are off until the user turns them on
+            mUpdatesRequested = false;
+            stupMap();
+
+            //  Create a new location client, using the enclosing class to handle
+            // callbacks.
+
+            //mLocationClient = new LocationClient(this, this, this);
+            //mLocationClient.connect();
+        }
+
+
+        //points.add(new LatLng(-7.312079, 112.731018));
         /*points.add(new LatLng(-7.313665, 112.729688));*/
        /* points.add(new LatLng(-7.313593, 112.728273));
         points.add(new LatLng(-7.312840, 112.728528));
         points.add(new LatLng(-7.311976, 112.726241));
         points.add(new LatLng(-7.310481, 112.726772));*/
 
-        PolylineOptions options = new PolylineOptions().width(5).color(Color.BLUE);
-        mGoogleMap.addPolyline(options.add(points.get(0)));
-
-
-
-        //button click
-        btnRefresh.setOnClickListener(new View.OnClickListener() {
-
+        Thread t = new Thread() {
             @Override
-            public void onClick(View v) {
-                PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
-                    /*for (int i = 0; i < points.size(); i++) {
-                        //LatLng point = points.get(i);
-                        options.add(points.get(i));
-                    }*/
+            public void run() {
+                while (true) {
+                    //try {
+                    //sleep(1000);
+                    if (PublicData.points.size() > 0 && PublicData.updateUI) {
+                        //Log.v("aufa y","update gmap");
+                        MonitoringActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
+                                mGoogleMap.addPolyline(options.addAll(PublicData.points));
+                                PublicData.updateUI = false;
+                            }
 
-                mGoogleMap.addPolyline(options.addAll(PublicData.points));
+                        });
 
+                    }
+                       /* } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+*/
+                }
             }
-        });
+        };
+        t.start();
 
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
@@ -197,12 +222,14 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
 
 
             } else {*/
-            latLong = new LatLng(-7.313430, 112.728283);
+           // if(isAlarm){
+             //   latLong = new LatLng(Double.parseDouble(b.getString("lat")),Double.parseDouble(b.getString("lng")));
+            /*} else*/ latLong = new LatLng(-7.313430, 112.728283);
             //}
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLong).zoom(16f).build();
 
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -239,53 +266,7 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
                 }
             });
 
-            new Thread(new Runnable() {
-                public void run() {
 
-                    //update googlemap
-                    PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
-                    if( PublicData.points.size() > 0 )
-                        mGoogleMap.addPolyline(options.addAll(PublicData.points));
-
-                    /*char  charat;
-
-                    ArrayList<Long> id;
-                    ArrayList number;
-                    ArrayList content;
-
-                    String numberSms = "";
-
-                    ArrayList sms = smsUtils.read();
-                    id = ((ArrayList) sms.get(0));
-                    number = ((ArrayList) sms.get(1));
-                    content = ((ArrayList) sms.get(2));
-
-
-                    for(int i=0;i<id.size();i++){
-                        charat = number.get(i).toString().charAt(0);
-                        if( charat == '0'  ){
-                            numberSms = number.get(i).toString();
-                        }else if( charat == '+' ){
-                            numberSms = "0" + number.get(i).toString().substring(2);
-                        }
-
-                        if( PublicData.noHardware.equals(numberSms) ){
-                            String body[] = content.get(i).toString().split("|");
-                            if(body[0] == "monitoring"){
-                                PublicData.points.add( new LatLng(Double.parseDouble(body[1]),Double.parseDouble(body[2])));
-
-                                //update googlemap
-                                PolylineOptions options = new PolylineOptions().width(3).color(Color.BLUE);
-                                mGoogleMap.addPolyline(options.addAll(PublicData.points));
-
-                                //delete sms
-                                smsUtils.delete(getApplicationContext(),id.get(i));
-                            }
-                        }
-
-                    }*/
-                }
-            }).start();
             /*markerLayout.setOnClickListener(new OnClickListener() {
 
                 @Override
@@ -322,7 +303,6 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
         // TODO Auto-generated method stub
 
 
-
         redrawLine();
 
     }
@@ -345,7 +325,7 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
 
     }
 
-    private void redrawLine(){
+    private void redrawLine() {
 
         //mGoogleMap.clear();  //clears all Markers and Polylines
 
@@ -356,6 +336,46 @@ public class MonitoringActivity extends FragmentActivity implements LocationList
         }
 
         line = mGoogleMap.addPolyline(options); //add Polyline
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Monitoring Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://app.safety.com.myapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Monitoring Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://app.safety.com.myapplication/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     private class GetLocationAsync extends AsyncTask<String, Void, String> {

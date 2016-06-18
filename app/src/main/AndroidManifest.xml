@@ -41,13 +41,14 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".myapplication.MainActivity">
+        <activity android:name=".myapplication.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".myapplication.MainActivity" />
         <activity android:name=".myapplication.MonitoringActivity" />
         <activity android:name=".myapplication.AddPoliceActivity" />
         <activity android:name=".myapplication.PoliceAcitvity" />
@@ -55,15 +56,20 @@
         <activity android:name=".adptr.MonitoringLocationAdapter" />
         <activity android:name=".myapplication.StreetViewActivity" />
         <activity android:name=".adptr.PoliceAdapter" />
-        <activity android:name=".myapplication.AlarmActivity"></activity>
+        <activity android:name=".myapplication.AlarmActivity" />
 
         <service android:name=".service.AlarmService" />
+
         <receiver android:name=".service.SmsListener">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".myapplication.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

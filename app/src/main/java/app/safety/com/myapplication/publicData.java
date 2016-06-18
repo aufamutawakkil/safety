@@ -17,5 +17,10 @@ public class PublicData {
 
     public static ArrayList<LatLng> points = new ArrayList();
     public  static GoogleMap publicGmap;
+    public static boolean updateUI = false;
+
+    public static boolean isAlarmActive = false;
+    public static String latAlarm = "";
+    public static String lngAlarm = "";
 
 }

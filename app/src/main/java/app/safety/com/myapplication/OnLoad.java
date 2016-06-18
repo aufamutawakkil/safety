@@ -30,7 +30,6 @@ public class OnLoad {
             @Override
             public Void success(Api.StaticArray params) throws JSONException {
 
-                Log.v("aufa ",params.data.toString());
 
                 PublicData.noHardware = params.data.get(0).get("noHardware");
                 PublicData.commandRestart = params.data.get(0).get("commandRestart");

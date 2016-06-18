@@ -37,20 +37,27 @@ public class SmsListener extends BroadcastReceiver {
                         msg_from = msgs[i].getOriginatingAddress();
                         String numberSms="";
                         chartat = msg_from.charAt(0);
-                        Log.v("aufa n",chartat + "");
-                        /*if( chartat == '0' ) numberSms = msg_from;
+                        if( chartat == '0' ) numberSms = msg_from;
                         else if( chartat == '6' ) numberSms = "0" + msg_from.substring(2);
                         else if( chartat == '+' ) numberSms = "0" + msg_from.substring(3);
-                        Log.v("aufa n",numberSms);*/
 
-                        /*String msgBody = msgs[i].getMessageBody();
+                        String msgBody = msgs[i].getMessageBody();
+                        String[] mode = msgBody.toString().split("\\|");
                         if(PublicData.noHardware.equals(numberSms)){
-                            String mode[] = msgBody.split("|");
                             if(mode[0].equals("monitoring")){
+                                PublicData.updateUI = true;
                                 PublicData.points.add( new LatLng(Double.parseDouble(mode[1]),Double.parseDouble(mode[2])));
-                                Log.v("aufa p",PublicData.points.toString());
+                                Log.v("aufapoints",PublicData.points.toString());
+
                             }
-                        }*/
+                        }
+
+                        if(mode[0].equals("alarm")){
+                            PublicData.isAlarmActive = true;
+                            Log.v("aufa","alram aktif");
+                            PublicData.latAlarm = mode[1];
+                            PublicData.lngAlarm = mode[2];
+                        }
                     }
 
                 }catch(Exception e){

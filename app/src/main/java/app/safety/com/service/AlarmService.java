@@ -3,13 +3,19 @@ package app.safety.com.service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.logging.Handler;
+
 import app.safety.com.myapplication.AlarmActivity;
+import app.safety.com.myapplication.PublicData;
 
 /**
  * Created by aufa on 6/2/2016.
@@ -25,28 +31,24 @@ public class AlarmService extends android.app.Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         context = this;
-        // Let it continue running until it is stopped.
-     /*   new CountDownTimer(20000, 1000) {
+        Log.v("aufa","oke gan");
 
-            public void onTick(long millisUntilFinished) {
-                //mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
+        /*Thread t = new Thread() {
+            @Override
+            public void run() {
+                while (true) {
+                    if(PublicData.isAlarmActive == true){
+                        PublicData.isAlarmActive = false;
+                        Intent dialogIntent = new Intent(context, AlarmActivity.class);
+                        dialogIntent                                                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(dialogIntent);
+                    }
+
+                }
             }
+        };
+        t.start();*/
 
-            public void onFinish() {
-              *//*  Intent i = context.getPackageManager().getLaunchIntentForPackage("app.safety.com.myapplicataion.AlarmActivity");
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(i);*//*
-
-                *//*Intent intent = new Intent();
-                intent.setClassName("app.safety.com", "myapplicataion.AlarmActivity");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);*//*
-
-                Intent dialogIntent = new Intent(context, AlarmActivity.class);
-                dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(dialogIntent);
-            }
-        }.start();*/
 
         return START_STICKY;
     }
